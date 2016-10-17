@@ -4,7 +4,7 @@ This repository contains useful functions for embedding audio into Jupyter noteb
 
 Usage:
 
-This is used in Jupyter notebooks so everything should be within the notebook environment. Check out the example notebook to see it go.
+This is used in Jupyter notebooks so everything should be within the notebook environment. Check out the example notebook!
 
 ~~~~
 import librosa
