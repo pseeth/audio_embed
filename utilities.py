@@ -5,6 +5,13 @@ from IPython.core.display import HTML
 from IPython.display import IFrame
 import librosa
 import base64
+import pkg_resources
+
+resource_package = __name__
+resource_path = '/'.join(['templates', 'multitrack.html'])
+
+multitrack_template = pkg_resources.resource_string(resource_package, resource_path)
+
 
 """
 This package has some functions I have found useful for manipulating and embedding audio into Jupyter notebooks.
@@ -67,15 +74,12 @@ def multitrack(sources, sr, name):
     <audio name="Background" url="<background_data>"></audio>
     </div>
     """
-    f = open('multitrack.html', 'r')
-    footer = f.read()
-    f.close()
     
     replace_points = ['<foreground_data>', '<background_data>']
     for s, r in zip(sources, replace_points):
         b = encode_audio(s, sr)
         template = template.replace(r, b)
-    template += footer
+    template += multitrack_template
     template = template.replace('NAME', name)
     IPython.display.display(HTML(template))
 
