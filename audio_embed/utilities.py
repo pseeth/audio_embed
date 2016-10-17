@@ -6,6 +6,8 @@ from IPython.display import IFrame
 import librosa
 import base64
 import pkg_resources
+import random
+import string
 
 resource_package = __name__
 resource_path = '/'.join(['templates', 'multitrack.html'])
@@ -19,6 +21,9 @@ This package has some functions I have found useful for manipulating and embeddi
 Requires librosa, ffmpy (which requires ffmpeg), and IPython.
 """
 
+def random_string(N):
+    return ''.join(random.choice(string.ascii_uppercase) for _ in range(N))
+
 def audio(d, sr):
     """
 	Write a numpy array to a temporary mp3 file using ffmpy, then embeds the mp3 into the notebook.
@@ -26,16 +31,17 @@ def audio(d, sr):
 	   d: numpy array of audio data.
 	   sr: sampling rate for the audio
 	"""
-    tmp_file = 'tmp.mp3'
-    file_path = 'tmp.wav'
-    librosa.output.write_wav('tmp.wav', d, sr)
+    rand_str = random_string(5)
+    tmp_file = rand_str + 'tmp.mp3'
+    tmp_wav = rand_str + 'tmp.wav'
+    librosa.output.write_wav(tmp_wav, d, sr)
     ff = ffmpy.FFmpeg(
-        inputs={file_path: None},
+        inputs={tmp_wav: None},
         outputs={tmp_file: None})
     ff.run()
     IPython.display.display(IPython.display.Audio(data=tmp_file, rate = sr))
-    os.remove('tmp.mp3')
-    os.remove('tmp.wav')
+    os.remove(tmp_file)
+    os.remove(tmp_wav)
 
 def encode_audio(d, sr):
     """
@@ -44,18 +50,20 @@ def encode_audio(d, sr):
 	   d: numpy array of audio data.
 	   sr: sampling rate for the audio
 	"""
-    tmp_file = 'tmp.mp3'
-    file_path = 'tmp.wav'
-    librosa.output.write_wav('tmp.wav', d, sr)
+    rand_str = random_string(5)
+    tmp_file = rand_str + 'tmp.mp3'
+    tmp_wav = rand_str + 'tmp.wav'
+    librosa.output.write_wav(tmp_wav, d, sr)
     ff = ffmpy.FFmpeg(
-        inputs={file_path: None},
+        inputs={tmp_wav: None},
         outputs={tmp_file: None})
     ff.run()
-    f = open('tmp.mp3', 'rb')
+    
+    f = open(tmp_file, 'rb')
     b = base64.b64encode(f.read())
     f.close()
-    os.remove('tmp.mp3')
-    os.remove('tmp.wav')
+    os.remove(tmp_file)
+    os.remove(tmp_wav)
     return 'data:audio/mpeg;base64,' + b
     
 
