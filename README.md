@@ -10,7 +10,7 @@ This is used in Jupyter notebooks so everything should be within the notebook en
 import librosa
 from audio_embed import utilities
 filename = librosa.util.example_audio_file()
-
+reload(utilities)
 #Apply a style sheet that makes audio elements stretch the page, and centers images.
 utilities.apply_style()
 
@@ -28,7 +28,7 @@ harmonic = librosa.istft(harmonic)
 percussive = librosa.istft(percussive)
 
 #Display the multitrack player which allows you to toggle between sources and the mixture.
-utilities.multitrack([harmonic, percussive], sr, 'test')
+utilities.multitrack([(harmonic, 'Harmonic'), (percussive, 'Percussive')], sr, 'test')
 ~~~~
 
 It contains a minified and handy multitrack HTML audio player designed by Bastien Liutkus (https://github.com/binarymind/multitrackHTMLPlayer) that is useful for looking at source separation algorithms.
