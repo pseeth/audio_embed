@@ -63,22 +63,21 @@ def multitrack(sources, sr, name):
     """
 	Takes a bunch of audio sources, converts them to mp3 to make them smaller, and creates a multitrack audio player in the notebook that lets you toggle between the sources and the mixture. Heavily adapted from https://github.com/binarymind/multitrackHTMLPlayer, designed by Bastien Liutkus.
 	Parameters:
-	    sources - list of numpy arrays, each containing a separated source which sum up to a mixture.
+	    sources - list of tuples of the form [(source_data, source_name), (source_data, source_name), ...] with each tuple containing a separated source which sum up to a mixture and a name for that source (e.g. harmonic, percussive).
 		sr - sampling rate for each audio file
         name - a uniquely identifiable name in your notebook, no spaces or special characters.
 	"""
 
     template = """
     <div id = 'NAME' class='audio-container'  name='NAME'>
-    <audio name="Foreground" url="<foreground_data>"></audio>
-    <audio name="Background" url="<background_data>"></audio>
-    </div>
     """
-    
-    replace_points = ['<foreground_data>', '<background_data>']
-    for s, r in zip(sources, replace_points):
-        b = encode_audio(s, sr)
-        template = template.replace(r, b)
+    for s in sources:
+        audio_element = '<audio name="source_name" url="source_data"></audio>'
+        b = encode_audio(s[0], sr)
+        audio_element = audio_element.replace('source_data', b)
+        audio_element = audio_element.replace('source_name', s[1])
+        template += audio_element
+    template += "</div>"
     template += multitrack_template
     template = template.replace('NAME', name)
     IPython.display.display(HTML(template))
