@@ -8,6 +8,7 @@ import base64
 import pkg_resources
 import random
 import string
+import numpy as np
 
 resource_package = __name__
 resource_path = '/'.join(['templates', 'multitrack.html'])
@@ -37,7 +38,7 @@ def audio(d, sr):
     librosa.output.write_wav(tmp_wav, d, sr)
     ff = ffmpy.FFmpeg(
         inputs={tmp_wav: None},
-        outputs={tmp_file: None})
+        outputs={tmp_file: '-write_xing 0 -codec:a libmp3lame -qscale:a 2'})
     ff.run()
     IPython.display.display(IPython.display.Audio(data=tmp_file, rate = sr))
     os.remove(tmp_file)
@@ -56,15 +57,16 @@ def encode_audio(d, sr):
     librosa.output.write_wav(tmp_wav, d, sr)
     ff = ffmpy.FFmpeg(
         inputs={tmp_wav: None},
-        outputs={tmp_file: None})
+        outputs={tmp_file: '-write_xing 0 -codec:a libmp3lame -qscale:a 2'})
     ff.run()
     
     f = open(tmp_file, 'rb')
-    b = base64.b64encode(f.read())
+    b = base64.b64encode(f.read()).decode('ascii')
     f.close()
+    
     os.remove(tmp_file)
     os.remove(tmp_wav)
-    return 'data:audio/mpeg;base64,' + b
+    return """data:audio/mpeg;base64,""" + b
     
 
 def multitrack(sources, sr, name):
@@ -79,8 +81,12 @@ def multitrack(sources, sr, name):
     template = """
     <div id = 'NAME' class='audio-container'  name='NAME'>
     """
+    #check lengths
     for s in sources:
-        audio_element = '<audio name="source_name" url="source_data"></audio>'
+        audio_element = """
+        <audio name="source_name" url="source_data">
+        </audio>
+        """
         b = encode_audio(s[0], sr)
         audio_element = audio_element.replace('source_data', b)
         audio_element = audio_element.replace('source_name', s[1])
