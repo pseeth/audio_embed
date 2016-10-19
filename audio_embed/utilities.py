@@ -38,7 +38,7 @@ def audio(d, sr):
     librosa.output.write_wav(tmp_wav, d, sr)
     ff = ffmpy.FFmpeg(
         inputs={tmp_wav: None},
-        outputs={tmp_file: '-write_xing 0 -codec:a libmp3lame -qscale:a 2'})
+        outputs={tmp_file: '-write_xing 0 -codec:a libmp3lame -b:a 128k'})
     ff.run()
     IPython.display.display(IPython.display.Audio(data=tmp_file, rate = sr))
     os.remove(tmp_file)
@@ -57,16 +57,14 @@ def encode_audio(d, sr):
     librosa.output.write_wav(tmp_wav, d, sr)
     ff = ffmpy.FFmpeg(
         inputs={tmp_wav: None},
-        outputs={tmp_file: '-write_xing 0 -codec:a libmp3lame -qscale:a 2'})
+        outputs={tmp_file: None})
     ff.run()
     
-    f = open(tmp_file, 'rb')
-    b = base64.b64encode(f.read()).decode('ascii')
-    f.close()
-    
+    audio = IPython.display.Audio(data = tmp_file, rate = sr)
+
     os.remove(tmp_file)
     os.remove(tmp_wav)
-    return """data:audio/mpeg;base64,""" + b
+    return audio.src_attr()
     
 
 def multitrack(sources, sr, name):
@@ -79,9 +77,8 @@ def multitrack(sources, sr, name):
 	"""
 
     template = """
-    <div id = 'NAME' class='audio-container'  name='NAME'>
+    <div id = 'NAME' class='audio-container' preload = 'auto' name='NAME'>
     """
-    #check lengths
     for s in sources:
         audio_element = """
         <audio name="source_name" url="source_data">

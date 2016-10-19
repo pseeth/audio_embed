@@ -21,7 +21,7 @@ generateHtml = function(container) {
 	container.append('<ul class="tracks"></ul>');
 	var containerTracks = container.find('.tracks');
 	audioTags.each(function(i){
-		containerTracks.append('<li class="track"><ul class="control"><li class="mute"><a href="javascript://">mute</a></li><li class="solo"><a href="javascript://"><span></span></a></li></ul><span class="status"></span><audio controls = "controls" index="'+i+'" container="'+containerID+'"><source src ="'+$(this).attr("url") + '"/>Your browser does not support the audio element.</audio><span class="track-name">'+$(this).attr("name")+'</span>'+'</li>');
+		containerTracks.append('<li class="track"><ul class="control"><li class="mute"><a href="javascript://">mute</a></li><li class="solo"><a href="javascript://"><span></span></a></li></ul><span class="status"></span><audio index="'+i+'" container="'+containerID+'"><source src ="'+$(this).attr("url") + '"/>Your browser does not support the audio element.</audio><span class="track-name">'+$(this).attr("name")+'</span>'+'</li>');
 	});	
 	container.append('<span class="loader"></span>');
 	if(!preload) {
