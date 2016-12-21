@@ -25,7 +25,7 @@ Requires librosa, ffmpy (which requires ffmpeg), and IPython.
 def random_string(N):
     return ''.join(random.choice(string.ascii_uppercase) for _ in range(N))
 
-def audio(d, sr):
+def write_audio(path, d, sr):
     """
 	Write a numpy array to a temporary mp3 file using ffmpy, then embeds the mp3 into the notebook.
 	Parameters:
@@ -33,7 +33,25 @@ def audio(d, sr):
 	   sr: sampling rate for the audio
 	"""
     rand_str = random_string(5)
-    tmp_file = rand_str + 'tmp.mp3'
+    output_file = path
+    tmp_wav = rand_str + 'tmp.wav'
+    flags = '-write_xing 0 -codec:a libmp3lame -b:a 128k'
+    librosa.output.write_wav(tmp_wav, d, sr)
+    ff = ffmpy.FFmpeg(
+        inputs={tmp_wav: None},
+        outputs={output_file: flags})
+    ff.run()
+    os.remove(tmp_wav)
+
+def audio(d, sr, ext = '.mp3'):
+    """
+	Write a numpy array to a temporary mp3 file using ffmpy, then embeds the mp3 into the notebook.
+	Parameters:
+	   d: numpy array of audio data.
+	   sr: sampling rate for the audio
+	"""
+    rand_str = random_string(5)
+    tmp_file = rand_str + 'tmp' + ext
     tmp_wav = rand_str + 'tmp.wav'
     librosa.output.write_wav(tmp_wav, d, sr)
     ff = ffmpy.FFmpeg(
@@ -44,7 +62,7 @@ def audio(d, sr):
     os.remove(tmp_file)
     os.remove(tmp_wav)
 
-def encode_audio(d, sr):
+def encode_audio(d, sr, ext='.mp3'):
     """
 	Writes the data to a temporary mp3 file using ffmpy, then returns the base64 encoding for further manipulation.
 	Parameters:
@@ -52,8 +70,9 @@ def encode_audio(d, sr):
 	   sr: sampling rate for the audio
 	"""
     rand_str = random_string(5)
-    tmp_file = rand_str + 'tmp.mp3'
+    tmp_file = rand_str + 'tmp' + ext
     tmp_wav = rand_str + 'tmp.wav'
+    flags = '-write_xing 0 -codec:a libmp3lame -b:a 128k'
     librosa.output.write_wav(tmp_wav, d, sr)
     ff = ffmpy.FFmpeg(
         inputs={tmp_wav: None},
@@ -67,7 +86,8 @@ def encode_audio(d, sr):
     return audio.src_attr()
     
 
-def multitrack(sources, sr, name):
+def multitrack(sources, sr):
+    name = random_string(10)
     """
 	Takes a bunch of audio sources, converts them to mp3 to make them smaller, and creates a multitrack audio player in the notebook that lets you toggle between the sources and the mixture. Heavily adapted from https://github.com/binarymind/multitrackHTMLPlayer, designed by Bastien Liutkus.
 	Parameters:
