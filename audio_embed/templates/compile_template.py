@@ -2,11 +2,11 @@ from csscompressor import compress
 from jsmin import jsmin
 
 f = open('screen.css', 'r')
-css = f.read()
+css = compress(f.read())
 f.close()
 
 f = open('player.js', 'r')
-js = f.read()
+js = jsmin(f.read())
 f.close()
 
 css = '<style>' + css + '</style>'
