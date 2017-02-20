@@ -8,5 +8,6 @@ setup(
     license='MIT',
     author='prem',
     author_email='prem@u.northwestern.edu',
-    description='Useful utilities for embedding audio into Jupyter notebooks.'
+    description='Useful utilities for embedding audio into Jupyter notebooks.',
+    include_package_data = True
 )
