@@ -8,7 +8,9 @@ import base64
 import pkg_resources
 import random
 import string
+from tempfile import NamedTemporaryFile
 import numpy as np
+from nussl import AudioSignal
 
 resource_package = __name__
 resource_path = '/'.join(['templates', 'multitrack.html'])
@@ -32,35 +34,39 @@ def write_audio(path, d, sr):
 	   d: numpy array of audio data.
 	   sr: sampling rate for the audio
 	"""
-    rand_str = random_string(5)
     output_file = path
-    tmp_wav = rand_str + 'tmp.wav'
+    tmp_wav = NamedTemporaryFile(mode='w', suffix='.wav')
     flags = '-write_xing 0 -codec:a libmp3lame -b:a 128k'
-    librosa.output.write_wav(tmp_wav, d, sr)
+    librosa.output.write_wav(tmp_wav.name, d, sr)
     ff = ffmpy.FFmpeg(
-        inputs={tmp_wav: None},
+        inputs={tmp_wav.name: None},
         outputs={output_file: flags})
     ff.run()
-    os.remove(tmp_wav)
+    tmp_wav.close()
+    os.remove(tmp_wav.name)
 
-def audio(d, sr, ext = '.mp3'):
+def audio(d, sr=None, ext = '.mp3'):
     """
 	Write a numpy array to a temporary mp3 file using ffmpy, then embeds the mp3 into the notebook.
 	Parameters:
 	   d: numpy array of audio data.
 	   sr: sampling rate for the audio
 	"""
-    rand_str = random_string(5)
-    tmp_file = rand_str + 'tmp' + ext
-    tmp_wav = rand_str + 'tmp.wav'
-    librosa.output.write_wav(tmp_wav, d, sr)
+    if type(d) is AudioSignal:
+        sr = d.sample_rate
+        d = d.audio_data
+    elif sr is None:
+        raise ValueError('Sample rate must be provided when d is not an AudioSignal object!')
+    tmp_converted = NamedTemporaryFile(mode='w+r', suffix='.mp3')
+    tmp_wav = NamedTemporaryFile(mode='w+r', suffix='.wav')
+    librosa.output.write_wav(tmp_wav.name, d, sr)
     ff = ffmpy.FFmpeg(
-        inputs={tmp_wav: None},
-        outputs={tmp_file: '-write_xing 0 -codec:a libmp3lame -b:a 128k'})
+        inputs={tmp_wav.name: None},
+        outputs={tmp_converted.name: '-write_xing 0 -codec:a libmp3lame -b:a 128k -y'})
     ff.run()
-    IPython.display.display(IPython.display.Audio(data=tmp_file, rate = sr))
-    os.remove(tmp_file)
-    os.remove(tmp_wav)
+    IPython.display.display(IPython.display.Audio(data=tmp_converted.name, rate = sr))
+    tmp_converted.close()
+    tmp_wav.close()
 
 def encode_audio(d, sr, ext='.mp3'):
     """
@@ -69,24 +75,25 @@ def encode_audio(d, sr, ext='.mp3'):
 	   d: numpy array of audio data.
 	   sr: sampling rate for the audio
 	"""
-    rand_str = random_string(5)
-    tmp_file = rand_str + 'tmp' + ext
-    tmp_wav = rand_str + 'tmp.wav'
-    flags = '-write_xing 0 -codec:a libmp3lame -b:a 128k'
-    librosa.output.write_wav(tmp_wav, d, sr)
+    if type(d) is AudioSignal:
+        sr = d.sample_rate
+        d = d.audio_data
+    elif sr is None:
+        raise ValueError('Sample rate must be provided when d is not an AudioSignal object!')
+    tmp_converted = NamedTemporaryFile(mode='w+r', suffix=ext)
+    tmp_wav = NamedTemporaryFile(mode='w+r', suffix='.wav')
+    librosa.output.write_wav(tmp_wav.name, d, sr)
     ff = ffmpy.FFmpeg(
-        inputs={tmp_wav: None},
-        outputs={tmp_file: None})
+        inputs={tmp_wav.name: None},
+        outputs={tmp_converted.name: '-write_xing 0 -codec:a libmp3lame -b:a 128k -y'})
     ff.run()
-    
-    audio = IPython.display.Audio(data = tmp_file, rate = sr)
-
-    os.remove(tmp_file)
-    os.remove(tmp_wav)
+    audio = IPython.display.Audio(data=tmp_converted.name, rate=sr)
+    tmp_converted.close()
+    tmp_wav.close()
     return audio.src_attr()
     
 
-def multitrack(sources, sr):
+def multitrack(sources, sr=None):
     name = random_string(10)
     """
 	Takes a bunch of audio sources, converts them to mp3 to make them smaller, and creates a multitrack audio player in the notebook that lets you toggle between the sources and the mixture. Heavily adapted from https://github.com/binarymind/multitrackHTMLPlayer, designed by Bastien Liutkus.
