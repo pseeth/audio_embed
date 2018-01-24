@@ -13,8 +13,8 @@ import string
 from tempfile import NamedTemporaryFile
 import numpy as np
 try:
-    nussl_available = True
     from nussl import AudioSignal
+    nussl_available = True
 except:
     nussl_available = False
 
