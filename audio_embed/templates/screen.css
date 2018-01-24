@@ -79,6 +79,7 @@
     zoom: 1;
     *display: inline;
     white-space: nowrap;
+    padding: 0;
 }
 .inline-block-list-item,
 .control-list > li,
@@ -490,6 +491,7 @@ h2 {
 .audio-container ul.tracks {
     width: 100%;
     border-top: 1px dashed lightgray;
+    padding: 0;
 }
 .audio-container ul.tracks > li {
     padding-top: 2px;
