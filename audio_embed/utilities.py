@@ -12,7 +12,11 @@ import random
 import string
 from tempfile import NamedTemporaryFile
 import numpy as np
-from nussl import AudioSignal
+try:
+    nussl_available = True
+    from nussl import AudioSignal
+except:
+    nussl_available = False
 
 resource_package = __name__
 resource_path = '/'.join(['templates', 'multitrack.html'])
@@ -77,9 +81,10 @@ def encode_audio(d, sr, ext='.mp3'):
 	   d: numpy array of audio data.
 	   sr: sampling rate for the audio
 	"""
-    if type(d) is AudioSignal:
-        sr = d.sample_rate
-        d = d.audio_data
+    if nussl_available:
+        if type(d) is AudioSignal:
+            sr = d.sample_rate
+            d = d.audio_data
     elif sr is None:
         raise ValueError('Sample rate must be provided when d is not an AudioSignal object!')
     tmp_converted = NamedTemporaryFile(mode='w+r', suffix=ext)
