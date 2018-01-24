@@ -64,8 +64,8 @@ def audio(d, sr=None, ext = '.mp3'):
             d = d.audio_data
         elif sr is None:
             raise ValueError('Sample rate must be provided when d is not an AudioSignal object!')
-    tmp_converted = NamedTemporaryFile(mode='w+r', suffix='.mp3')
-    tmp_wav = NamedTemporaryFile(mode='w+r', suffix='.wav')
+    tmp_converted = NamedTemporaryFile(mode='w+', suffix='.mp3')
+    tmp_wav = NamedTemporaryFile(mode='w+', suffix='.wav')
     librosa.output.write_wav(tmp_wav.name, d, sr)
     ff = ffmpy.FFmpeg(
         inputs={tmp_wav.name: None},
@@ -88,8 +88,8 @@ def encode_audio(d, sr, ext='.mp3'):
             d = d.audio_data
         elif sr is None:
             raise ValueError('Sample rate must be provided when d is not an AudioSignal object!')
-    tmp_converted = NamedTemporaryFile(mode='w+r', suffix=ext)
-    tmp_wav = NamedTemporaryFile(mode='w+r', suffix='.wav')
+    tmp_converted = NamedTemporaryFile(mode='w+', suffix=ext)
+    tmp_wav = NamedTemporaryFile(mode='w+', suffix='.wav')
     librosa.output.write_wav(tmp_wav.name, d, sr)
     ff = ffmpy.FFmpeg(
         inputs={tmp_wav.name: None},
