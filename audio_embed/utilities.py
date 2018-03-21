@@ -41,7 +41,7 @@ def write_audio(path, d, sr):
 	   sr: sampling rate for the audio
 	"""
     output_file = path
-    tmp_wav = NamedTemporaryFile(mode='w', suffix='.wav')
+    tmp_wav = NamedTemporaryFile(mode='w+', suffix='.wav')
     flags = '-nostdin -write_xing 0 -codec:a libmp3lame -b:a 128k'
     librosa.output.write_wav(tmp_wav.name, d, sr)
     ff = ffmpy.FFmpeg(
@@ -65,10 +65,10 @@ def audio(d, sr=None, ext = '.mp3'):
         elif sr is None:
             raise ValueError('Sample rate must be provided when d is not an AudioSignal object!')
 
-    tmp_wav = NamedTemporaryFile(mode='w+r', suffix='.wav')
+    tmp_wav = NamedTemporaryFile(mode='w+', suffix='.wav')
     librosa.output.write_wav(tmp_wav.name, d, sr)
     if ext != '.wav':
-        tmp_converted = NamedTemporaryFile(mode='w+r', suffix=ext)
+        tmp_converted = NamedTemporaryFile(mode='w+', suffix=ext)
         ff = ffmpy.FFmpeg(
             inputs={tmp_wav.name: None},
             outputs={tmp_converted.name: '-write_xing 0 -codec:a libmp3lame -b:a 128k -y'})
@@ -93,8 +93,10 @@ def encode_audio(d, sr=None, ext='.mp3'):
             d = d.audio_data
         elif sr is None:
             raise ValueError('Sample rate must be provided when d is not an AudioSignal object!')
+    tmp_wav = NamedTemporaryFile(mode='w+', suffix='.wav')
+    librosa.output.write_wav(tmp_wav.name, d, sr)
     if ext != '.wav':
-        tmp_converted = NamedTemporaryFile(mode='w+r', suffix=ext)
+        tmp_converted = NamedTemporaryFile(mode='w+', suffix=ext)
         ff = ffmpy.FFmpeg(
             inputs={tmp_wav.name: None},
             outputs={tmp_converted.name: '-write_xing 0 -codec:a libmp3lame -b:a 128k -y'})
