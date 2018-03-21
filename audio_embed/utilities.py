@@ -57,15 +57,20 @@ def audio(d, sr=None, ext = '.mp3'):
         d = d.audio_data
     elif sr is None:
         raise ValueError('Sample rate must be provided when d is not an AudioSignal object!')
-    tmp_converted = NamedTemporaryFile(mode='w+r', suffix='.mp3')
+
     tmp_wav = NamedTemporaryFile(mode='w+r', suffix='.wav')
     librosa.output.write_wav(tmp_wav.name, d, sr)
-    ff = ffmpy.FFmpeg(
-        inputs={tmp_wav.name: None},
-        outputs={tmp_converted.name: '-write_xing 0 -codec:a libmp3lame -b:a 128k -y'})
-    ff.run()
+    if ext != '.wav':
+        tmp_converted = NamedTemporaryFile(mode='w+r', suffix=ext)
+        ff = ffmpy.FFmpeg(
+            inputs={tmp_wav.name: None},
+            outputs={tmp_converted.name: '-write_xing 0 -codec:a libmp3lame -b:a 128k -y'})
+        ff.run()
+    else:
+        tmp_converted = tmp_wav
     IPython.display.display(IPython.display.Audio(data=tmp_converted.name, rate = sr))
-    tmp_converted.close()
+    if ext != '.wav':
+        tmp_converted.close()
     tmp_wav.close()
 
 def encode_audio(d, sr, ext='.mp3'):
