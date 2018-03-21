@@ -58,11 +58,12 @@ def audio(d, sr=None, ext = '.mp3'):
 	   d: numpy array of audio data.
 	   sr: sampling rate for the audio
 	"""
-    if type(d) is AudioSignal:
-        sr = d.sample_rate
-        d = d.audio_data
-    elif sr is None:
-        raise ValueError('Sample rate must be provided when d is not an AudioSignal object!')
+    if nussl_available:
+        if type(d) is AudioSignal:
+            sr = d.sample_rate
+            d = d.audio_data
+        elif sr is None:
+            raise ValueError('Sample rate must be provided when d is not an AudioSignal object!')
 
     tmp_wav = NamedTemporaryFile(mode='w+r', suffix='.wav')
     librosa.output.write_wav(tmp_wav.name, d, sr)
@@ -79,7 +80,7 @@ def audio(d, sr=None, ext = '.mp3'):
         tmp_converted.close()
     tmp_wav.close()
 
-def encode_audio(d, sr, ext='.mp3'):
+def encode_audio(d, sr=None, ext='.mp3'):
     """
 	Writes the data to a temporary mp3 file using ffmpy, then returns the base64 encoding for further manipulation.
 	Parameters:
